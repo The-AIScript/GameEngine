@@ -6,12 +6,12 @@ require! {
 
 describe "Game Engine", ->
   describe '#start()', (...) ->
-    describe 'config', (...) ->
+    describe '#_load-map()', (...) ->
       it 'should throw an error if the map does not exists', (done) ->
         game-engine = new GameEngine do
           map: \blabla
 
-        (err) <- game-engine.start
+        (err) <- game-engine._load-map
         err.should.be.an.instanceof Error
         err.code.should.eql \ENOENT
 
@@ -21,7 +21,7 @@ describe "Game Engine", ->
         game-engine = new GameEngine do
           map: \test
 
-        (err) <- game-engine.start
+        (err) <- game-engine._load-map
         should.not.exist err
         {map, map-info} = game-engine
         # check map
@@ -32,5 +32,3 @@ describe "Game Engine", ->
         map-info.name.should.equal \test
 
         done!
-
-
