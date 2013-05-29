@@ -7,11 +7,11 @@ require! {
 }
 
 describe "AI Engine", (...) ->
-  describe '#start()', (...) ->
+  describe '#init()', (...) ->
     it 'should throw an error if socket resource is not provided', (done) ->
       ai-engine = AIEngine!
 
-      (err) <- ai-engine.start
+      (err) <- ai-engine.init
       async-error-throw err, "Must provide socket resource!"
 
       done!

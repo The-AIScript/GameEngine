@@ -5,9 +5,9 @@ require! {
   async
 }
 class GameEngine
-  (@options) ->
+  (@options) ~>
 
-  start: (callback) ->
+  init: (callback) ~>
     async.waterfall [
       @_load-map,
       (callback) ~>
@@ -18,10 +18,12 @@ class GameEngine
 
         @game-info = {}
         @game-info{snake, food} = default-config
+
+        err = null
         if @game-info.snake > @map-info.\max-snake or @game-info.snake < 2
-          callback new Error "`snake` is out of range"
-        else
-          callback null
+          err = new Error "`snake` is out of range"
+        callback err
+
     ], callback
 
   _load-map: (callback) ~>
@@ -33,8 +35,8 @@ class GameEngine
     if err
       callback err
     else
-      @map = results[0].to-string!.replace(/\n/g, '')
       @map-info = JSON.parse results[1].to-string!
+      @map-info.map = results[0].to-string!.replace(/\n/g, '')
       callback null
 
 exports = module.exports = GameEngine

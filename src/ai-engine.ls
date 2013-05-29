@@ -4,7 +4,7 @@ require! {
 class AIEngine
   (@options = {}) ~>
 
-  start: (callback) ~>
+  init: (callback) ~>
     @resource = @options.resource
     if not @resource
       callback new Error 'Must provide socket resource!'
