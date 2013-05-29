@@ -3,5 +3,5 @@
   "version": "1.0",
   "height": 10,
   "width": 10,
-  "snake-max": 2
+  "max-snake": 4
 }

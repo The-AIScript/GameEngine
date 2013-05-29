@@ -8,9 +8,23 @@ class GameEngine
   (@options) ->
 
   start: (callback) ->
-    @_load-map callback
+    async.waterfall [
+      @_load-map,
+      (callback) ~>
+        default-config =
+          snake: @map-info.\max-snake
+          food: @map-info.\max-snake
+        default-config <<< @options
 
-  _load-map: (callback) ->
+        @game-info = {}
+        @game-info{snake, food} = default-config
+        if @game-info.snake > @map-info.\max-snake or @game-info.snake < 2
+          callback new Error "`snake` is out of range"
+        else
+          callback null
+    ], callback
+
+  _load-map: (callback) ~>
     {map} = @options
     p = path.join __dirname, "../map/#map."
     map-path = p + \map
