@@ -2,15 +2,16 @@
   "name": "Snake",
   "version": "0.0.1",
   "private": true,
-  "scripts": {
-  },
+  "scripts": {},
   "dependencies": {
     "async": ">=0.2.8",
     "msgpack": "*",
     "underscore": "*"
   },
   "devDependencies": {
-    "LiveScript": "1.1.1"
+    "LiveScript": "1.1.1",
+    "mocha": ">=1.10",
+    "should": ">=1.2"
   },
   "engine": {
     "node": ">=0.10.0"

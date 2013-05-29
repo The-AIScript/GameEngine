@@ -1,0 +1,8 @@
+{
+  "name": "test",
+  "version": "1.0",
+  "height": 10,
+  "width": 10,
+  "snake-max": 2,
+  "food-max": 2
+}
