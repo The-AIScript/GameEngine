@@ -7,11 +7,11 @@ require! {
 }
 
 describe "AI Engine", (...) ->
-  describe '#init()', (...) ->
+  describe '#_load-config()', (...) ->
     it 'should throw an error if socket `resource` is not provided', (done) ->
       ai-engine = AIEngine id: 1
 
-      (err) <- ai-engine.init
+      (err) <- ai-engine._load-config
       async-error-throw err, "Must provide socket `resource`!"
 
       done!
@@ -20,12 +20,12 @@ describe "AI Engine", (...) ->
       resource = 'ipc:///tmp/id-test.ipc'
       ai-engine = AIEngine resource: resource
 
-      (err) <- ai-engine.init
+      (err) <- ai-engine._load-config
       async-error-throw err, "Must provide engine's `id`!"
 
       done!
 
-  describe '#subscribe()', (...) ->
+  describe '#_subscribe()', (...) ->
     it 'should subscribe to game engine', (done) ->
       # the publisher
       socket = zmq.socket 'pub'
@@ -41,10 +41,12 @@ describe "AI Engine", (...) ->
             resource: resource
             id: index
 
-          (err) <- ai-engine.init
+          (err) <- ai-engine._load-config
           should.not.exist err
 
-          ai-engine.subscribe!
+          ai-engine._subscribe (err) ->
+            should.not.exist err
+
           <- ai-engine.on \finish
 
           finish-count := finish-count + 1
