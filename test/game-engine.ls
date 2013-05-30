@@ -30,7 +30,7 @@ describe "Game Engine", ->
 
       (err) <- game-engine._load-map
       should.not.exist err
-      {map-info} = game-engine
+      {map-info} = game-engine.game-info
       # check map-info
       map-info.should.be.a \object
       map-info.name.should.equal \test
@@ -96,7 +96,7 @@ describe "Game Engine", ->
 
       (err) <- game-engine._load-engine-config
       should.not.exist err
-      game-engine.resource.should.equal resource
+      game-engine.config.resource.should.equal resource
 
       done!
 
@@ -201,4 +201,3 @@ describe "Game Engine", ->
 
       game-engine.ai-engines.should.have.length 2
       done!
-

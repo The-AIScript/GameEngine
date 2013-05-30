@@ -28,31 +28,32 @@ class GameEngine extends EventEmitter
     if err
       callback err
     else
-      @map-info = JSON.parse results[1].to-string!
-      @map-info.map = results[0].to-string!.replace(/\n/g, '')
+      @game-info = {}
+      @game-info.map-info = JSON.parse results[1].to-string!
+      @game-info.map-info.map = results[0].to-string!.replace(/\n/g, '')
       callback null
 
   _load-game-config: (callback) ~>
     # depends on #_load-map()
     default-config =
-      snake: @map-info.\max-snake
-      food: @map-info.\max-snake
+      snake: @game-info.map-info.\max-snake
+      food: @game-info.map-info.\max-snake
     default-config <<< @options
 
-    @game-info = {}
     @game-info{snake, food} = default-config
 
-    if @game-info.snake > @map-info.\max-snake or @game-info.snake < 2
+    if @game-info.snake > @game-info.map-info.\max-snake or @game-info.snake < 2
       callback new Error "`snake` is out of range"
     else
       callback null
 
   _load-engine-config: (callback) ~>
-    @resource = @options.resource
-    if not @resource or typeof! @resource isnt \Object
+    @config = {}
+    @config.resource = @options.resource
+    if not @config.resource or typeof! @config.resource isnt \Object
       callback new Error 'Must provide socket `resource`!'
     else
-      {pub, rep} = @resource
+      {pub, rep} = @config.resource
       if pub? and rep?
         callback null
       else
@@ -63,11 +64,11 @@ class GameEngine extends EventEmitter
     @replier = zmq.socket 'rep'
     async.parallel [
       (callback) ~>
-        @publisher.bind @resource.pub, callback
+        @publisher.bind @config.resource.pub, callback
       , (callback) ~>
         async.series [
           (callback) ~>
-            @replier.bind @resource.rep, callback
+            @replier.bind @config.resource.rep, callback
           , (callback) ~>
             @connect-count = 0
             @replier.on \message, (data) ~>
@@ -86,7 +87,7 @@ class GameEngine extends EventEmitter
     @ai-engines = []
     async.map [0 til @game-info.snake], (index, callback) ~>
       ai-engine = AIEngine do
-        resource: @resource
+        resource: @config.resource
         id: index
       @ai-engines[index] = ai-engine
       ai-engine.init callback
