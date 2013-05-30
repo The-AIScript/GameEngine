@@ -1,11 +1,14 @@
 require! {
   should
   async
+  zmq
 
   GameEngine: \../src/game-engine
 
   './helper'.async-error-throw
 }
+
+resource = 'ipc:///tmp/test.ipc'
 
 describe "Game Engine", ->
   describe '#_load-map()', (...) ->
@@ -19,7 +22,7 @@ describe "Game Engine", ->
 
       done!
 
-    it 'should load the map correctly', (done) ->
+    it 'should load the map', (done) ->
       game-engine = GameEngine do
         map: \test
 
@@ -36,12 +39,38 @@ describe "Game Engine", ->
 
       done!
 
+  describe '#_bind()', (...) ->
+    it 'should bind to socket resource', (done) ->
+      resource = 'ipc:///tmp/bind-test.ipc'
+
+      # setup publisher
+      game-engine = GameEngine do
+        map: \test
+        resource: resource
+      (err) <- game-engine.init
+      should.not.exist err
+      (err) <- game-engine._bind
+      should.not.exist err
+
+      client = zmq.socket 'sub'
+      client.connect resource
+      client.subscribe ''
+      client.on \message, (data) ->
+        data.to-string!.should.equal \bind
+        client.close!
+        game-engine.close!
+        done!
+
+
+      game-engine.send \bind
+
   describe '#init()', (...) ->
-    it 'should read snake and food config correctly', (done) ->
+    it 'should read snake and food config', (done) ->
       game-engine = GameEngine do
         map: \test
         snake: 2
         food: 1
+        resource: resource
 
       (err) <- game-engine.init
       should.not.exist err
@@ -54,6 +83,7 @@ describe "Game Engine", ->
     it "should use `max-snake` as the default value of snake and food", (done) ->
       game-engine = GameEngine do
         map: \test
+        resource: resource
 
       (err) <- game-engine.init
       should.not.exist err
@@ -75,3 +105,12 @@ describe "Game Engine", ->
           callback null
 
       async.parallel [out-of-range-test(6), out-of-range-test(1), out-of-range-test(-1)], done
+
+    it "should throw an error if socket `resource` is not provided", (done) ->
+      game-engine = GameEngine do
+        map: \test
+
+      (err) <- game-engine.init
+      async-error-throw err, "Must provide socket `resource`!"
+
+      done!

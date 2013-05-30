@@ -1,16 +1,19 @@
 require! {
   fs
   path
+  events.EventEmitter
 
   async
+  zmq
 }
-class GameEngine
+class GameEngine extends EventEmitter
   (@options) ~>
 
   init: (callback) ~>
     async.waterfall [
       @_load-map,
       (callback) ~>
+        # game-related configs
         default-config =
           snake: @map-info.\max-snake
           food: @map-info.\max-snake
@@ -23,7 +26,12 @@ class GameEngine
         if @game-info.snake > @map-info.\max-snake or @game-info.snake < 2
           err = new Error "`snake` is out of range"
         callback err
-
+      , (callback) ~>
+        # engine-related configs
+        @resource = @options.resource
+        if not @resource
+          callback new Error 'Must provide socket `resource`!'
+        else callback null
     ], callback
 
   _load-map: (callback) ~>
@@ -38,5 +46,15 @@ class GameEngine
       @map-info = JSON.parse results[1].to-string!
       @map-info.map = results[0].to-string!.replace(/\n/g, '')
       callback null
+
+  _bind: (callback) ~>
+    @socket = zmq.socket 'pub'
+    @socket.bind @resource, callback
+
+  send: (data) ~>
+    @socket.send data
+
+  close: ~>
+    @socket.close!
 
 exports = module.exports = GameEngine
