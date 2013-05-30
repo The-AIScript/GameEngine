@@ -46,19 +46,44 @@ class GameEngine extends EventEmitter
 
   _load-engine-config: (callback) ~>
     @resource = @options.resource
-    if not @resource
+    if not @resource or typeof! @resource isnt \Object
       callback new Error 'Must provide socket `resource`!'
     else
-      callback null
+      {pub, rep} = @resource
+      if pub? and rep?
+        callback null
+      else
+        callback new Error '`resource` should include `pub` and `rep`!'
 
   _bind: (callback) ~>
     @publisher = zmq.socket 'pub'
-    @publisher.bind @resource, callback
+    @replier = zmq.socket 'rep'
+    async.parallel [
+      (callback) ~>
+        @publisher.bind @resource.pub, callback
+      , (callback) ~>
+        async.series [
+          (callback) ~>
+            @replier.bind @resource.rep, callback
+          , (callback) ~>
+            @connect-count = 0
+            @replier.on \message, (data) ~>
+              if data.to-string! is \ACK
+                @replier.send \OK
+                @emit 'connected:one'
+                ++@connect-count
+                if @connect-count is @game-info.snake
+                  @emit 'connected:all'
+
+            callback null
+        ], callback
+    ], callback
 
   send: (data) ~>
     @publisher.send data
 
   close: ~>
     @publisher.close!
+    @replier.close!
 
 exports = module.exports = GameEngine

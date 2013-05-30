@@ -8,7 +8,9 @@ require! {
   './helper'.async-error-throw
 }
 
-resource = 'ipc:///tmp/test.ipc'
+resource =
+  pub: 'ipc:///tmp/test-pub.ipc'
+  rep: 'ipc:///tmp/test-rep.ipc'
 
 describe "Game Engine", ->
   describe '#_load-map()', (...) ->
@@ -107,27 +109,74 @@ describe "Game Engine", ->
 
       done!
 
+    it "should throw an error if `resource` doesn't include `pub` or `rep` property", (done) ->
+      game-engine = GameEngine do
+        resource:
+          pub: 'ipc:///tmp/test-pub.ipc'
+
+      (err) <- game-engine._load-engine-config
+      async-error-throw err, "`resource` should include `pub` and `rep`!"
+
+      game-engine = GameEngine do
+        resource:
+          rep: 'ipc:///tmp/test-pub.ipc'
+
+      (err) <- game-engine._load-engine-config
+      async-error-throw err, "`resource` should include `pub` and `rep`!"
+
+      game-engine = GameEngine do
+        resource:
+          blabla: 'blabla'
+      (err) <- game-engine._load-engine-config
+      async-error-throw err, "`resource` should include `pub` and `rep`!"
+
+      done!
+
   describe '#_bind()', (...) ->
-    it 'should bind to socket resource', (done) ->
-      resource = 'ipc:///tmp/bind-test.ipc'
+    it "should trigger events when requestor connected", (done) ->
+      resource =
+        pub: 'ipc:///tmp/bind-test-pub.ipc'
+        rep: 'ipc:///tmp/bind-test-rep.ipc'
 
       # setup publisher
       game-engine = GameEngine do
         map: \test
         resource: resource
-      (err) <- game-engine.init
+        snake: 2
+      (err) <- game-engine._load-map
+      should.not.exist err
+      (err) <- game-engine._load-game-config
+      should.not.exist err
+      (err) <- game-engine._load-engine-config
       should.not.exist err
       (err) <- game-engine._bind
       should.not.exist err
 
-      client = zmq.socket 'sub'
-      client.connect resource
-      client.subscribe ''
-      client.on \message, (data) ->
+      # setup subscriber
+      subscriber = zmq.socket 'sub'
+      subscriber.connect resource.pub
+      subscriber.subscribe ''
+      requestor = zmq.socket 'req'
+      requestor.connect resource.rep
+
+      # handlers
+      requestor.on \message, (data) ->
+        data.to-string!.should.equal \OK
+
+      subscriber.count = 0
+      game-engine.on \connected:one, ->
+        ++subscriber.count
+
+      game-engine.on \connected:all, ->
+        subscriber.count.should.equal 2
+        game-engine.send \bind
+
+      subscriber.on \message, (data) ->
         data.to-string!.should.equal \bind
-        client.close!
+        subscriber.close!
         game-engine.close!
         done!
 
-
-      game-engine.send \bind
+      # send message
+      requestor.send \ACK
+      requestor.send \ACK
