@@ -180,3 +180,25 @@ describe "Game Engine", ->
       # send message
       requestor.send \ACK
       requestor.send \ACK
+
+  describe '#_start-ai-engine()', (...) ->
+    it 'should start `snake` ai-engines', (done) ->
+      game-engine = GameEngine do
+        resource: resource
+        map: \test
+        snake: 2
+
+      (err) <- game-engine._load-map
+      should.not.exist err
+      (err) <- game-engine._load-game-config
+      should.not.exist err
+      (err) <- game-engine._load-engine-config
+      should.not.exist err
+      (err) <- game-engine._bind
+      should.not.exist err
+      (err) <- game-engine._start-ai-engine
+      should.not.exist err
+
+      game-engine.ai-engines.should.have.length 2
+      done!
+

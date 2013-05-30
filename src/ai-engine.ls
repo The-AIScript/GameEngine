@@ -2,13 +2,27 @@ require! {
   events.EventEmitter
 
   zmq
+  async
 }
 
 class AIEngine extends EventEmitter
   (@options = {}) ~>
 
   init: (callback) ~>
-    async.series [@_load-config, @_subscribe], callback
+    async.series [
+      @_load-config
+      @_subscribe
+    ], callback
+
+  _load-config: (callback) ~>
+    @resource = @options.resource
+    @id = @options.id
+    if not @resource
+      callback new Error 'Must provide socket `resource`!'
+    else if not @id?
+      callback new Error "Must provide engine's `id`!"
+    else
+      callback null
 
   _subscribe: (callback) ~>
     @subscriber = zmq.socket 'sub'
@@ -22,16 +36,6 @@ class AIEngine extends EventEmitter
       @_execute-ai data
 
     callback null
-
-  _load-config: (callback) ~>
-    @resource = @options.resource
-    @id = @options.id
-    if not @resource
-      callback new Error 'Must provide socket `resource`!'
-    else if not @id?
-      callback new Error "Must provide engine's `id`!"
-    else
-      callback null
 
   _execute-ai: (@data) ~>
     @emit 'finish'

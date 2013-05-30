@@ -5,15 +5,18 @@ require! {
 
   async
   zmq
+
+  AIEngine: \./ai-engine
 }
 class GameEngine extends EventEmitter
   (@options) ~>
 
   init: (callback) ~>
-    async.waterfall [
-      @_load-map,
-      @_load-game-config,
+    async.series [
+      @_load-map
+      @_load-game-config
       @_load-engine-config
+      @_bind
     ], callback
 
   _load-map: (callback) ~>
@@ -78,6 +81,16 @@ class GameEngine extends EventEmitter
             callback null
         ], callback
     ], callback
+
+  _start-ai-engine: (callback) ~>
+    @ai-engines = []
+    async.map [0 til @game-info.snake], (index, callback) ~>
+      ai-engine = AIEngine do
+        resource: @resource
+        id: index
+      @ai-engines[index] = ai-engine
+      ai-engine.init callback
+    , callback
 
   send: (data) ~>
     @publisher.send data
