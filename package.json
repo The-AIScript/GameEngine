@@ -6,6 +6,7 @@
   "dependencies": {
     "async": ">=0.2.8",
     "msgpack": "*",
+    "zmq": ">=2.4",
     "underscore": "*"
   },
   "devDependencies": {
