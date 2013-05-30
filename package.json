@@ -7,10 +7,11 @@
     "async": ">=0.2.8",
     "msgpack": "*",
     "zmq": ">=2.4",
-    "underscore": "*"
+    "underscore": ">=1.4",
+    "underscore.string": ">=2.3"
   },
   "devDependencies": {
-    "LiveScript": "1.1.1",
+    "LiveScript": ">=1.1.1",
     "mocha": ">=1.10",
     "should": ">=1.2"
   },

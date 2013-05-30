@@ -7,6 +7,7 @@ require! {
   zmq
 
   AIEngine: \./ai-engine
+  './helper'.map-string-to-array
 }
 class GameEngine extends EventEmitter
   (@options) ~>
@@ -30,7 +31,8 @@ class GameEngine extends EventEmitter
     else
       @game-info = {}
       @game-info.map-info = JSON.parse results[1].to-string!
-      @game-info.map-info.map = results[0].to-string!.replace(/\n/g, '')
+      @game-info.map-info.map-data = results[0].to-string!.replace(/\n/g, '')
+      @game-info.map-info.map = map-string-to-array @game-info.map-info
       callback null
 
   _load-game-config: (callback) ~>

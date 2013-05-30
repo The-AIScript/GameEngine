@@ -5,7 +5,7 @@ require! {
 
   GameEngine: \../src/game-engine
 
-  './helper'.async-error-throw
+  '../src/helper'.async-error-throw
 }
 
 resource =
@@ -35,9 +35,9 @@ describe "Game Engine", ->
       map-info.should.be.a \object
       map-info.name.should.equal \test
       map-info.'max-snake'.should.equal 4
-      # check map
-      map-info.map.should.have.length 100
-      map-info.map[0].should.equal \.
+      # check map-data
+      map-info.map-data.should.have.length 100
+      map-info.map-data[0].should.equal \.
 
       done!
 

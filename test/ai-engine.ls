@@ -3,7 +3,7 @@ require! {
   should
 
   AIEngine: \../src/ai-engine
-  './helper'.async-error-throw
+  '../src/helper'.async-error-throw
 }
 resource =
   pub: 'ipc:///tmp/id-test-pub.ipc'
