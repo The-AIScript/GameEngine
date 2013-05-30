@@ -11,12 +11,15 @@ class AIEngine extends EventEmitter
     async.series [@_load-config, @_subscribe], callback
 
   _subscribe: (callback) ~>
-    @socket = zmq.socket 'sub'
-    @socket.connect @resource
-    @socket.subscribe ''
+    @subscriber = zmq.socket 'sub'
+    @subscriber.connect @resource.pub
+    @subscriber.subscribe ''
+    @requestor = zmq.socket 'req'
+    @requestor.connect @resource.rep
+    @requestor.send \ACK
 
-    @socket.on 'message', (data) ~>
-      @_ai data
+    @subscriber.on 'message', (data) ~>
+      @_execute-ai data
 
     callback null
 
@@ -30,10 +33,11 @@ class AIEngine extends EventEmitter
     else
       callback null
 
-  _ai: (@data) ~>
+  _execute-ai: (@data) ~>
     @emit 'finish'
 
   close: ~>
-    @socket.close!
+    @subscriber.close!
+    @requestor.close!
 
 exports = module.exports = AIEngine

@@ -5,6 +5,9 @@ require! {
   AIEngine: \../src/ai-engine
   './helper'.async-error-throw
 }
+resource =
+  pub: 'ipc:///tmp/id-test-pub.ipc'
+  rep : 'ipc:///tmp/id-test-rep.ipc'
 
 describe "AI Engine", (...) ->
   describe '#_load-config()', (...) ->
@@ -17,7 +20,6 @@ describe "AI Engine", (...) ->
       done!
 
     it 'should throw an error if ai `id` is not provided', (done) ->
-      resource = 'ipc:///tmp/id-test.ipc'
       ai-engine = AIEngine resource: resource
 
       (err) <- ai-engine._load-config
@@ -25,12 +27,26 @@ describe "AI Engine", (...) ->
 
       done!
 
+    it 'should load `resource` and `id`', (done) ->
+      ai-engine = AIEngine do
+        id: 1
+        resource: resource
+
+      (err) <- ai-engine._load-config
+      ai-engine.id.should.equal 1
+      ai-engine.resource.should.eql resource
+
+      done!
+
+
   describe '#_subscribe()', (...) ->
     it 'should subscribe to game engine', (done) ->
       # the publisher
-      socket = zmq.socket 'pub'
-      resource = 'ipc:///tmp/subscribe-test.ipc'
-      (err) <- socket.bind resource
+      publisher = zmq.socket 'pub'
+      resource =
+        pub: 'ipc:///tmp/subscribe-test-pub.ipc'
+        rep: 'ipc:///tmp/subscribe-test-rep.ipc'
+      (err) <- publisher.bind resource.pub
       should.not.exist err
 
       # the subscriber
@@ -53,8 +69,7 @@ describe "AI Engine", (...) ->
           ai-engine.data.to-string!.should.equal \hello
           ai-engine.close!
           if finish-count is 2
-            socket.close!
+            publisher.close!
             done!
 
-      socket.send \hello
-
+      publisher.send \hello
