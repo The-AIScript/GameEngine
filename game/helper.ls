@@ -16,8 +16,10 @@ exports.direction-mapping =
 
 # helpers
 exports.map-string-to-array = (map-data) ->
-  {height, width, map-string} = map-data
-  map-array = _.chop map-string, width
+  {height, width, string} = map-data
+  if height * width isnt string.length
+    throw new Error '`height` and `width` do not match the string'
+  map-array = _.chop string, width
   wall = _.repeat \#, width + 2
   map-array = map-array.map (line) ->
     \# + line + \#
