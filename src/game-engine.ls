@@ -18,6 +18,7 @@ class GameEngine extends EventEmitter
       @_load-game-config
       @_load-engine-config
       @_bind
+      @_start-ai-engine
     ], callback
 
   _load-map: (callback) ~>
@@ -95,7 +96,7 @@ class GameEngine extends EventEmitter
       ai-engine.init callback
     , callback
 
-  send: (data) ~>
+  _send: (data) ~>
     @publisher.send data
 
   close: ~>

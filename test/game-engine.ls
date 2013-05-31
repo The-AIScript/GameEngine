@@ -169,7 +169,7 @@ describe "Game Engine", ->
 
       game-engine.on \connected:all, ->
         subscriber.count.should.equal 2
-        game-engine.send \bind
+        game-engine._send \bind
 
       subscriber.on \message, (data) ->
         data.to-string!.should.equal \bind

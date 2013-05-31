@@ -3,24 +3,6 @@ require! {
   _: \underscore.string
 }
 
-# mappings
-exports.map-mapping =
-  SPACE: \.
-  WALL: \#
-
-exports.direction-mapping =
-  0:
-    x: 0
-    y: -1
-  1:
-    x: 1
-    y: 0
-  2:
-    x: 0
-    y: 1
-  3:
-    x: -1
-    y: 0
 
 # helpers
 exports.map-string-to-array = (map-info) ->
