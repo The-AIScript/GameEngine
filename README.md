@@ -1,1 +1,1 @@
-# Snake Game
+# Game Engine with Snake game example
