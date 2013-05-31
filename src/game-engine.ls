@@ -14,9 +14,9 @@ class GameEngine extends EventEmitter
 
   init: (callback) ~>
     async.series [
-      @_load-engine-config
+      @_load-config
       @_bind
-      @_start-ai-engine
+      @_init-ai
     ], callback
 
   _init-game: (callback) ~>
@@ -25,7 +25,7 @@ class GameEngine extends EventEmitter
     @game = Game @options
     @game.init callback
 
-  _load-engine-config: (callback) ~>
+  _load-config: (callback) ~>
     @config = {}
     @config.resource = @options.resource
     if not @config.resource or typeof! @config.resource isnt \Object
@@ -38,30 +38,15 @@ class GameEngine extends EventEmitter
         callback new Error '`resource` should include `pub` and `rep`!'
 
   _bind: (callback) ~>
+    @connection-count = 0
     @publisher = zmq.socket 'pub'
     @replier = zmq.socket 'rep'
     async.parallel [
-      (callback) ~>
-        @publisher.bind @config.resource.pub, callback
-      , (callback) ~>
-        async.series [
-          (callback) ~>
-            @replier.bind @config.resource.rep, callback
-          , (callback) ~>
-            @connect-count = 0
-            @replier.on \message, (data) ~>
-              if data.to-string! is \ACK
-                @replier.send \OK
-                @emit 'connected:one'
-                ++@connect-count
-                if @connect-count is @game.config.snake
-                  @emit 'connected:all'
-
-            callback null
-        ], callback
+      @_bind-publisher
+      @_bind-replier
     ], callback
 
-  _start-ai-engine: (callback) ~>
+  _init-ai: (callback) ~>
     @ai-engines = []
     async.map [0 til @game.config.snake], (index, callback) ~>
       ai-engine = AIEngine do
@@ -77,5 +62,26 @@ class GameEngine extends EventEmitter
   close: ~>
     @publisher.close!
     @replier.close!
+
+  # helper
+  _replier-handler: (data) ~>
+    if data.to-string! is \ACK
+      @replier.send \OK
+      @emit 'connected:one'
+      ++@connection-count
+      if @connection-count is @game.config.snake
+        @emit 'connected:all'
+
+  _bind-publisher: (callback) ~>
+    @publisher.bind @config.resource.pub, callback
+
+  _bind-replier: (callback) ~>
+    async.series [
+      (callback) ~>
+        @replier.bind @config.resource.rep, callback
+      , (callback) ~>
+        @replier.on \message, @_replier-handler
+        callback null
+    ], callback
 
 exports = module.exports = GameEngine

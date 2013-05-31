@@ -11,7 +11,7 @@ class AIEngine extends EventEmitter
   init: (callback) ~>
     async.series [
       @_load-config
-      @_subscribe
+      @_connect
     ], callback
 
   _load-config: (callback) ~>
@@ -24,7 +24,7 @@ class AIEngine extends EventEmitter
     else
       callback null
 
-  _subscribe: (callback) ~>
+  _connect: (callback) ~>
     @subscriber = zmq.socket 'sub'
     @subscriber.connect @resource.pub
     @subscriber.subscribe ''

@@ -13,12 +13,12 @@ resource =
   rep: 'ipc:///tmp/test-rep.ipc'
 
 describe "Game Engine", ->
-  describe '#_load-engine-config()', (...) ->
+  describe '#_load-config()', (...) ->
     it "should load resource config", (done) ->
       game-engine = GameEngine do
         resource: resource
 
-      (err) <- game-engine._load-engine-config
+      (err) <- game-engine._load-config
       should.not.exist err
       game-engine.config.resource.should.equal resource
 
@@ -28,7 +28,7 @@ describe "Game Engine", ->
       game-engine = GameEngine do
         map: \test
 
-      (err) <- game-engine._load-engine-config
+      (err) <- game-engine._load-config
       async-error-throw err, "Must provide socket `resource`!"
 
       done!
@@ -38,20 +38,20 @@ describe "Game Engine", ->
         resource:
           pub: 'ipc:///tmp/test-pub.ipc'
 
-      (err) <- game-engine._load-engine-config
+      (err) <- game-engine._load-config
       async-error-throw err, "`resource` should include `pub` and `rep`!"
 
       game-engine = GameEngine do
         resource:
           rep: 'ipc:///tmp/test-pub.ipc'
 
-      (err) <- game-engine._load-engine-config
+      (err) <- game-engine._load-config
       async-error-throw err, "`resource` should include `pub` and `rep`!"
 
       game-engine = GameEngine do
         resource:
           blabla: 'blabla'
-      (err) <- game-engine._load-engine-config
+      (err) <- game-engine._load-config
       async-error-throw err, "`resource` should include `pub` and `rep`!"
 
       done!
@@ -69,7 +69,7 @@ describe "Game Engine", ->
         snake: 2
       (err) <- game-engine._init-game
       should.not.exist err
-      (err) <- game-engine._load-engine-config
+      (err) <- game-engine._load-config
       should.not.exist err
       (err) <- game-engine._bind
       should.not.exist err
@@ -103,8 +103,8 @@ describe "Game Engine", ->
       requestor.send \ACK
       requestor.send \ACK
 
-  describe '#_start-ai-engine()', (...) ->
-    it 'should start `snake` ai-engines', (done) ->
+  describe '#_init-ai()', (...) ->
+    it 'should init `snake` ai-engines', (done) ->
       game-engine = GameEngine do
         resource: resource
         map: \test
@@ -112,11 +112,11 @@ describe "Game Engine", ->
 
       (err) <- game-engine._init-game
       should.not.exist err
-      (err) <- game-engine._load-engine-config
+      (err) <- game-engine._load-config
       should.not.exist err
       (err) <- game-engine._bind
       should.not.exist err
-      (err) <- game-engine._start-ai-engine
+      (err) <- game-engine._init-ai
       should.not.exist err
 
       game-engine.ai-engines.should.have.length 2

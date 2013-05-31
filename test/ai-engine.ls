@@ -39,13 +39,13 @@ describe "AI Engine", (...) ->
       done!
 
 
-  describe '#_subscribe()', (...) ->
-    it 'should subscribe to game engine', (done) ->
+  describe '#_connect()', (...) ->
+    it 'should connect to game engine', (done) ->
       # the publisher
       publisher = zmq.socket 'pub'
       resource =
-        pub: 'ipc:///tmp/subscribe-test-pub.ipc'
-        rep: 'ipc:///tmp/subscribe-test-rep.ipc'
+        pub: 'ipc:///tmp/connect-test-pub.ipc'
+        rep: 'ipc:///tmp/connect-test-rep.ipc'
       (err) <- publisher.bind resource.pub
       should.not.exist err
 
@@ -60,7 +60,7 @@ describe "AI Engine", (...) ->
           (err) <- ai-engine._load-config
           should.not.exist err
 
-          ai-engine._subscribe (err) ->
+          ai-engine._connect (err) ->
             should.not.exist err
 
           <- ai-engine.on \finish
