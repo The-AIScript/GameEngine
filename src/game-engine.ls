@@ -10,45 +10,20 @@ require! {
   './helper'.map-string-to-array
 }
 class GameEngine extends EventEmitter
-  (@options) ~>
+  (@options = {}) ~>
 
   init: (callback) ~>
     async.series [
-      @_load-map
-      @_load-game-config
       @_load-engine-config
       @_bind
       @_start-ai-engine
     ], callback
 
-  _load-map: (callback) ~>
-    {map} = @options
-    p = path.join __dirname, "../map/#map."
-    map-path = p + \map
-    info-path = p + \json
-    (err, results) <~ async.map [map-path, info-path], fs.read-file
-    if err
-      callback err
-    else
-      @game-info = {}
-      @game-info.map-info = JSON.parse results[1].to-string!
-      @game-info.map-info.map-data = results[0].to-string!.replace(/\n/g, '')
-      @game-info.map-info.map = map-string-to-array @game-info.map-info
-      callback null
-
-  _load-game-config: (callback) ~>
-    # depends on #_load-map()
-    default-config =
-      snake: @game-info.map-info.\max-snake
-      food: @game-info.map-info.\max-snake
-    default-config <<< @options
-
-    @game-info{snake, food} = default-config
-
-    if @game-info.snake > @game-info.map-info.\max-snake or @game-info.snake < 2
-      callback new Error "`snake` is out of range"
-    else
-      callback null
+  _init-game: (callback) ~>
+    # TODO: hard coded snake game here
+    Game = require \../game/snake
+    @game = Game @options
+    @game.init callback
 
   _load-engine-config: (callback) ~>
     @config = {}
@@ -79,7 +54,7 @@ class GameEngine extends EventEmitter
                 @replier.send \OK
                 @emit 'connected:one'
                 ++@connect-count
-                if @connect-count is @game-info.snake
+                if @connect-count is @game.config.snake
                   @emit 'connected:all'
 
             callback null
@@ -88,7 +63,7 @@ class GameEngine extends EventEmitter
 
   _start-ai-engine: (callback) ~>
     @ai-engines = []
-    async.map [0 til @game-info.snake], (index, callback) ~>
+    async.map [0 til @game.config.snake], (index, callback) ~>
       ai-engine = AIEngine do
         resource: @config.resource
         id: index

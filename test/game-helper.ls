@@ -25,7 +25,7 @@ describe "Helpers", ->
         height: 2
         width: 4
         string: \..
-      fn = ->
+      fn = ~>
         map-string-to-array map-obj
 
       fn.should.throw '`height` and `width` do not match the string'
