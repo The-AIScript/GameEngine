@@ -1,0 +1,7 @@
+{
+  "name": "wall",
+  "version": "1.0",
+  "height": 50,
+  "width": 50,
+  "max-snake": 2
+}

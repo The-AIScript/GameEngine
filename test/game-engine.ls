@@ -5,7 +5,7 @@ require! {
 
   GameEngine: \../src/game-engine
 
-  '../src/helper'.async-error-throw
+  './test-helper'.async-error-throw
 }
 
 resource =
@@ -68,9 +68,7 @@ describe "Game Engine", ->
         resource: resource
         snake: 2
       (err) <- game-engine._init-game
-      should.not.exist err
       (err) <- game-engine._load-config
-      should.not.exist err
       (err) <- game-engine._bind
       should.not.exist err
 
@@ -111,11 +109,8 @@ describe "Game Engine", ->
         snake: 2
 
       (err) <- game-engine._init-game
-      should.not.exist err
       (err) <- game-engine._load-config
-      should.not.exist err
       (err) <- game-engine._bind
-      should.not.exist err
       (err) <- game-engine._init-ai
       should.not.exist err
 

@@ -26,3 +26,7 @@ exports.map-string-to-array = (map-data) ->
   map-array.push wall
   map-array.unshift wall
   map-array
+
+exports.random-int = (max, min = 1) ->
+  Math.floor(Math.random! * (max - min + 1)) + min
+

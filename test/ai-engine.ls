@@ -3,7 +3,7 @@ require! {
   should
 
   AIEngine: \../src/ai-engine
-  '../src/helper'.async-error-throw
+  './test-helper'.async-error-throw
 }
 resource =
   pub: 'ipc:///tmp/id-test-pub.ipc'
@@ -58,7 +58,6 @@ describe "AI Engine", (...) ->
             id: index
 
           (err) <- ai-engine._load-config
-          should.not.exist err
 
           ai-engine._connect (err) ->
             should.not.exist err

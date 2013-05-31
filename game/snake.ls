@@ -5,6 +5,8 @@ require! {
 
   async
   './helper'.map-string-to-array
+  './helper'.random-int
+  './helper'.direction-mapping
 }
 class SnakeGame extends EventEmitter
   (@options = {}) ~>
@@ -53,5 +55,27 @@ class SnakeGame extends EventEmitter
         else
           callback null
     ], callback
+
+  _setup: (callback) ~>
+    @snakes = []
+    @foods = []
+    for i from 1 to @config.snake
+      snake = {}
+      snake.position = [@_get-random-space!]
+      snake.heading = direction-mapping[random-int(4) - 1]
+      @snakes.push snake
+
+    for i from 1 to @config.food
+      @foods.push @_get-random-space!
+
+    callback null
+
+  # helper
+  _get-random-space: ~>
+    [x, y] = [0, 0]
+    while @map.array[y][x] isnt \.
+      x = random-int @map.width
+      y = random-int @map.height
+    [x, y]
 
 exports = module.exports = SnakeGame

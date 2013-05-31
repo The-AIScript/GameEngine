@@ -4,7 +4,7 @@ require! {
 
   SnakeGame: \../game/snake
 
-  '../src/helper'.async-error-throw
+  './test-helper'.async-error-throw
 }
 
 describe "Snake Game", ->
@@ -87,3 +87,49 @@ describe "Snake Game", ->
           callback null
 
       async.parallel [out-of-range-test(6), out-of-range-test(1), out-of-range-test(-1)], done
+
+  describe '#_setup()', (...) ->
+    var game
+    before-each (done) ->
+      game := SnakeGame do
+        map: \test
+        snake: 2
+        food: 2
+      (err) <- game._load-config
+      (err) <- game._setup
+      should.not.exists err
+
+      done!
+
+
+    it 'should generate random coordinate on space for each snake', (done) ->
+      for snake in game.snakes
+        [x, y] = snake.position[0]
+        game.map.array[y][x].should.equal \.
+
+      done!
+
+    it 'should generate random heading for each snake', (done) ->
+      for snake in game.snakes
+        snake.heading.should.be.an.instanceof Array
+        snake.heading.should.have.length 2
+
+      done!
+
+    it 'should generate random coordinate on space for each food', (done) ->
+      for food in game.foods
+        [x, y] = food
+        game.map.array[y][x].should.equal \.
+
+      done!
+
+  describe '#_get-random-space()', (...) ->
+    it 'should generate random cooradinate on space', (done) ->
+      game = SnakeGame do
+        map: \wall
+      (err) <- game._load-config
+      for i from 0 til 50
+        [x, y] = game._get-random-space!
+        game.map.array[y][x].should.equal \.
+
+      done!

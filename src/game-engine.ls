@@ -7,7 +7,6 @@ require! {
   zmq
 
   AIEngine: \./ai-engine
-  './helper'.map-string-to-array
 }
 class GameEngine extends EventEmitter
   (@options = {}) ~>
