@@ -15,14 +15,9 @@ class GameEngine extends EventEmitter
     async.series [
       @_load-config
       @_bind
+      @_init-game
       @_init-ai
     ], callback
-
-  _init-game: (callback) ~>
-    # TODO: hard coded snake game here
-    Game = require \../game/snake
-    @game = Game @options
-    @game.init callback
 
   _load-config: (callback) ~>
     @config = {}
@@ -44,6 +39,12 @@ class GameEngine extends EventEmitter
       @_bind-publisher
       @_bind-replier
     ], callback
+
+  _init-game: (callback) ~>
+    # TODO: hard coded snake game here
+    Game = require \../game/snake
+    @game = Game @options, this
+    @game.init callback
 
   _init-ai: (callback) ~>
     @ai-engines = []

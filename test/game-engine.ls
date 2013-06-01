@@ -67,8 +67,8 @@ describe "Game Engine", ->
         map: \test
         resource: resource
         snake: 2
-      (err) <- game-engine._init-game
       (err) <- game-engine._load-config
+      (err) <- game-engine._init-game
       (err) <- game-engine._bind
       should.not.exist err
 
@@ -108,9 +108,9 @@ describe "Game Engine", ->
         map: \test
         snake: 2
 
-      (err) <- game-engine._init-game
       (err) <- game-engine._load-config
       (err) <- game-engine._bind
+      (err) <- game-engine._init-game
       (err) <- game-engine._init-ai
       should.not.exist err
 

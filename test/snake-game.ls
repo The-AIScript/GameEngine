@@ -1,6 +1,7 @@
 require! {
   should
   async
+  events.EventEmitter
 
   SnakeGame: \../game/snake
 
@@ -51,9 +52,10 @@ describe "Snake Game", ->
   describe '#_load-config()', (...) ->
     it 'should load snake and food config', (done) ->
       game = SnakeGame do
-        map: \test
-        snake: 2
-        food: 1
+        * map: \test
+          snake: 2
+          food: 1
+        * this
       (err) <- game._load-config
       should.not.exist err
 
@@ -65,7 +67,8 @@ describe "Snake Game", ->
 
     it "should use `max-snake` as the default value of snake and food", (done) ->
       game = SnakeGame do
-        map: \test
+        * map: \test
+        * this
       (err) <- game._load-config
       should.not.exist err
 
@@ -79,8 +82,9 @@ describe "Snake Game", ->
       out-of-range-test = (snake) ->
         (callback) ->
           game = SnakeGame do
-            map: \test
-            snake: snake
+            * map: \test
+              snake: snake
+            * this
           (err) <- game._load-config
 
           async-error-throw err, "`snake` is out of range"
@@ -88,13 +92,23 @@ describe "Snake Game", ->
 
       async.parallel [out-of-range-test(6), out-of-range-test(1), out-of-range-test(-1)], done
 
+    it "should throw an error if `engine` is not provided", (done) ->
+      game = SnakeGame do
+        map: \test
+
+      (err) <- game._load-config
+      async-error-throw err, "Must provide game-engine!"
+
+      done!
+
   describe '#_setup()', (...) ->
     var game
     before-each (done) ->
       game := SnakeGame do
-        map: \test
-        snake: 2
-        food: 2
+        * map: \test
+          snake: 2
+          food: 2
+        * this
       (err) <- game._load-config
       (err) <- game._setup
       should.not.exists err
@@ -122,6 +136,36 @@ describe "Snake Game", ->
         game.map.array[y][x].should.equal \.
 
       done!
+
+  describe '#_get-full-data()', (...) ->
+    var game
+    before-each (done) ->
+      game := SnakeGame do
+        * map: \test
+          snake: 3
+          food: 2
+        * new EventEmitter
+
+      (err) <- game._load-config
+      (err) <- game._setup
+      done!
+    it 'should return an object', ->
+      game._get-full-data!.should.be.an.instanceof Object
+    it 'should include map, config, snakes and food', ->
+      full-data = game._get-full-data!
+      should.exist full-data.snake
+      should.exist full-data.food
+      should.exist full-data.name
+      should.exist full-data.height
+      should.exist full-data.width
+      should.exist full-data.map
+      should.exist full-data.snakes
+      full-data.snakes.should.be.an.instanceof Array
+      should.exist full-data.foods
+      full-data.foods.should.be.an.instanceof Array
+      full-data.snakes[0].should.be.a \object
+      should.exist full-data.snakes[0].heading
+      should.exist full-data.snakes[0].position
 
   describe '#_get-random-space()', (...) ->
     it 'should generate random cooradinate on space', (done) ->

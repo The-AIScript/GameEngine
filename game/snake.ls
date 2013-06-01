@@ -9,7 +9,7 @@ require! {
   './helper'.direction-mapping
 }
 class SnakeGame extends EventEmitter
-  (@options = {}) ~>
+  (@options = {}, @engine) ~>
 
   init: (callback) ~>
     async.series [
@@ -42,6 +42,11 @@ class SnakeGame extends EventEmitter
         else
           @_load-map callback
       , (callback) ~>
+        if @engine?
+          callback null
+        else
+          callback new Error 'Must provide game-engine!'
+      , (callback) ~>
         default-config =
           snake: @map.\max-snake
           food: @map.\max-snake
@@ -69,6 +74,16 @@ class SnakeGame extends EventEmitter
       @foods.push @_get-random-space!
 
     callback null
+
+  _get-full-data: ~>
+    data = {}
+    data <<< @config
+    data <<< @map
+    data.map = data.string
+    delete data.array
+    delete data.string
+    data{snakes, foods} = @
+    data
 
   # helper
   _get-random-space: ~>
