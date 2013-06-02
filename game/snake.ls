@@ -4,9 +4,9 @@ require! {
   events.EventEmitter
 
   async
-  './helper'.map-data-to-array
   './helper'.random-int
   './helper'.direction-mapping
+  Map: \./map
 }
 class SnakeGame extends EventEmitter
   (@options = {}, @engine) ~>
@@ -30,9 +30,9 @@ class SnakeGame extends EventEmitter
       if err
         callback err
       else
-        @map = JSON.parse results[1].to-string!
-        @map.string = results[0].to-string!.replace(/\n/g, '')
-        @map.array = map-data-to-array @map
+        @config = JSON.parse results[1].to-string!
+        @config.map = results[0].to-string!.replace(/\n/g, '')
+        @map = Map @config
         callback null
 
   _load-config: (callback) ~>
@@ -48,15 +48,15 @@ class SnakeGame extends EventEmitter
         else
           callback new Error 'Must provide game-engine!'
       , (callback) ~>
-        default-config =
-          snake: @map.\max-snake
-          food: @map.\max-snake
-        default-config <<< @options
+        config =
+          # default
+          snake: @config.\max-snake
+          food: @config.\max-snake
+        config <<< @options
 
-        @config = {}
-        @config{snake, food} = default-config
+        @config{snake, food} = config
 
-        if @config.snake > @map.\max-snake or @config.snake < 2
+        if @config.snake > @config.\max-snake or @config.snake < 2
           callback new Error "`snake` is out of range"
         else
           callback null
@@ -68,13 +68,17 @@ class SnakeGame extends EventEmitter
     @foods = []
     for i from 0 til @config.snake
       snake = {}
-      snake.position = [@_get-random-space!]
+      birth-position = @map.get-random-space!
+      snake.position = [birth-position]
+      @map.set birth-position, \S
       snake.heading = direction-mapping[random-int(4) - 1]
       snake.id = i
       @snakes.push snake
 
     for i from 1 to @config.food
-      @foods.push @_get-random-space!
+      pos = @map.get-random-space!
+      @foods.push pos
+      @map.set pos, \F
 
     @engine.on \connected:all, @_on-connected-handler
 
@@ -83,24 +87,12 @@ class SnakeGame extends EventEmitter
   _get-full-data: ~>
     data = {}
     data <<< @config
-    data <<< @map
-    data.map = data.string
     data.round = @round
-    delete data.array
-    delete data.string
     data{snakes, foods} = @
     data
 
   # handler
   _on-connected-handler: ~>
     @engine.send @_get-full-data!
-
-  # helper
-  _get-random-space: ~>
-    [x, y] = [0, 0]
-    while @map.array[y][x] isnt \.
-      x = random-int @map.width
-      y = random-int @map.height
-    [x, y]
 
 exports = module.exports = SnakeGame

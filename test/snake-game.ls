@@ -36,18 +36,18 @@ describe "Snake Game", ->
 
       (err) <- game._load-map
       should.not.exist err
-      {map} = game
-      # check map
-      map.should.be.a \object
-      map.name.should.equal \test
-      map.'max-snake'.should.equal 4
+      {config, map} = game
+      # check map-config
+      config.should.be.a \object
+      config.name.should.equal \test
+      config.'max-snake'.should.equal 4
       # check map string
-      map.string.should.have.length 100
-      map.string[0].should.equal \.
+      config.map.should.have.length 100
+      config.map[0].should.equal \.
       # check map array
-      map.array.should.have.length 12
-      map.array[0][0].should.equal \#
-      map.array[0].should.have.length 12
+      map.real-map.should.have.length 12
+      map.get([0 0]).should.equal \#
+      map.real-map[0].should.have.length 12
 
       done!
 
@@ -121,7 +121,7 @@ describe "Snake Game", ->
     it 'should generate random coordinate on space for each snake', (done) ->
       for snake in game.snakes
         [x, y] = snake.position[0]
-        game.map.array[y][x].should.equal \.
+        game.map.battlefield[y][x].should.equal \.
 
       done!
 
@@ -135,7 +135,7 @@ describe "Snake Game", ->
     it 'should generate random coordinate on space for each food', (done) ->
       for food in game.foods
         [x, y] = food
-        game.map.array[y][x].should.equal \.
+        game.map.battlefield[y][x].should.equal \.
 
       done!
 
@@ -151,8 +151,10 @@ describe "Snake Game", ->
       (err) <- game._load-config
       (err) <- game._setup
       done!
+
     it 'should return an object', ->
       game._get-full-data!.should.be.an.instanceof Object
+
     it 'should include map, config, snakes and food', ->
       full-data = game._get-full-data!
       should.exist full-data.snake
@@ -171,14 +173,3 @@ describe "Snake Game", ->
         should.exist full-data.snakes[i].position
         should.exist full-data.snakes[i].id
         full-data.snakes[i].id.should.equal i
-
-  describe '#_get-random-space()', (...) ->
-    it 'should generate random cooradinate on space', (done) ->
-      game = SnakeGame do
-        map: \wall
-      (err) <- game._load-config
-      for i from 0 til 50
-        [x, y] = game._get-random-space!
-        game.map.array[y][x].should.equal \.
-
-      done!
