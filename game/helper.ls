@@ -1,5 +1,4 @@
 require! {
-  should
   _: \underscore.string
 }
 
@@ -31,4 +30,14 @@ exports.map-data-to-array = (map-data) ->
 
 exports.random-int = (max, min = 1) ->
   Math.floor(Math.random! * (max - min + 1)) + min
+
+deep-clone-array = exports.deep-clone-array = (array) ->
+  if typeof! array is \Array
+    result = []
+    for i from 0 til array.length
+      result.push deep-clone-array array[i]
+    result
+  else
+    array
+
 
