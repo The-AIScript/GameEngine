@@ -5,6 +5,7 @@ require! {
   msgpack
 
   GameEngine: \../src/game-engine
+  Game: \../game/snake
 
   './test-helper'.async-error-throw
 }
@@ -59,17 +60,19 @@ describe "Game Engine", ->
 
   describe '#_bind()', (...) ->
     it "should trigger events when requestor connected", (done) ->
-      resource =
+      resource:
         pub: 'ipc:///tmp/bind-test-pub.ipc'
         rep: 'ipc:///tmp/bind-test-rep.ipc'
-
-      # setup publisher
-      game-engine = GameEngine do
+      options =
         map: \test
         resource: resource
         snake: 2
+
+      # setup publisher
+      game-engine = GameEngine options
       (err) <- game-engine._load-config
-      (err) <- game-engine._init-game
+      game-engine.game = Game options, game-engine
+      (err) <- game-engine.game._load-config
       (err) <- game-engine._bind
       should.not.exist err
 
@@ -104,10 +107,13 @@ describe "Game Engine", ->
 
   describe '#_init-ai()', (...) ->
     it 'should init `snake` ai-engines', (done) ->
+      fn = (data, callback) ->
+        callback null
       game-engine = GameEngine do
         resource: resource
         map: \test
         snake: 2
+        strategies: [fn, fn]
 
       (err) <- game-engine._load-config
       (err) <- game-engine._init-game

@@ -18,10 +18,14 @@ class AIEngine extends EventEmitter
   _load-config: (callback) ~>
     @resource = @options.resource
     @id = @options.id
+    @strategy = @options.strategy
+
     if not @resource
       callback new Error 'Must provide socket `resource`!'
     else if not @id?
       callback new Error "Must provide engine's `id`!"
+    else if not (@strategy? and typeof! @strategy is \Function)
+      callback new Error "Must ptovide engine's `strategy`!"
     else
       callback null
 
@@ -39,6 +43,7 @@ class AIEngine extends EventEmitter
     callback null
 
   _execute-ai: (@data) ~>
+    (err) <~ @strategy @data
     @emit 'finish'
 
   close: ~>

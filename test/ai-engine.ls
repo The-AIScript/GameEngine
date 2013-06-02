@@ -29,14 +29,31 @@ describe "AI Engine", (...) ->
 
       done!
 
-    it 'should load `resource` and `id`', (done) ->
+    it 'should throw an error if ai `strategy` is not provided', (done) ->
+      ai-engine = AIEngine do
+        resource: resource
+        id: 1
+
+      (err) <- ai-engine._load-config
+      async-error-throw err, "Must ptovide engine's `strategy`!"
+
+      done!
+
+    it 'should load `resource` and `id` and `strategy`', (done) ->
+      fn = ->
+        @
       ai-engine = AIEngine do
         id: 1
         resource: resource
+        strategy: fn
 
       (err) <- ai-engine._load-config
+      should.exist ai-engine.id
       ai-engine.id.should.equal 1
+      should.exist ai-engine.resource
       ai-engine.resource.should.eql resource
+      should.exist ai-engine.strategy
+      ai-engine.strategy.should.be.a \function
 
       done!
 
@@ -53,11 +70,14 @@ describe "AI Engine", (...) ->
 
       # the subscriber
       finish-count = 0
+      fn = (data, callback) ->
+        callback null
       for i in [0, 1]
         let index = i
           ai-engine = AIEngine do
             resource: resource
             id: index
+            strategy: fn
 
           (err) <- ai-engine._load-config
 

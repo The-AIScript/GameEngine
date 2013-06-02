@@ -15,6 +15,7 @@ class SnakeGame extends EventEmitter
     async.series [
       @_load-map
       @_load-config
+      @_setup
     ], callback
 
   _load-map: (callback) ~>
@@ -84,6 +85,7 @@ class SnakeGame extends EventEmitter
     data <<< @config
     data <<< @map
     data.map = data.string
+    data.round = @round
     delete data.array
     delete data.string
     data{snakes, foods} = @

@@ -32,6 +32,12 @@ class GameEngine extends EventEmitter
       else
         callback new Error '`resource` should include `pub` and `rep`!'
 
+  _init-game: (callback) ~>
+    # TODO: hard coded snake game here
+    Game = require \../game/snake
+    @game = Game @options, this
+    @game.init callback
+
   _bind: (callback) ~>
     @connection-count = 0
     @publisher = zmq.socket 'pub'
@@ -41,18 +47,13 @@ class GameEngine extends EventEmitter
       @_bind-replier
     ], callback
 
-  _init-game: (callback) ~>
-    # TODO: hard coded snake game here
-    Game = require \../game/snake
-    @game = Game @options, this
-    @game.init callback
-
   _init-ai: (callback) ~>
     @ai-engines = []
     async.map [0 til @game.config.snake], (index, callback) ~>
       ai-engine = AIEngine do
         resource: @config.resource
         id: index
+        strategy: @options.strategies[index]
       @ai-engines[index] = ai-engine
       ai-engine.init callback
     , callback
