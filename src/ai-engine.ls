@@ -3,6 +3,7 @@ require! {
 
   zmq
   async
+  msgpack
 }
 
 class AIEngine extends EventEmitter
@@ -33,7 +34,7 @@ class AIEngine extends EventEmitter
     @requestor.send \ACK
 
     @subscriber.on 'message', (data) ~>
-      @_execute-ai data
+      @_execute-ai msgpack.unpack(data)
 
     callback null
 

@@ -2,6 +2,7 @@ require! {
   should
   async
   zmq
+  msgpack
 
   GameEngine: \../src/game-engine
 
@@ -89,10 +90,10 @@ describe "Game Engine", ->
 
       game-engine.on \connected:all, ->
         subscriber.count.should.equal 2
-        game-engine._send \bind
+        game-engine.send \bind
 
       subscriber.on \message, (data) ->
-        data.to-string!.should.equal \bind
+        msgpack.unpack(data).should.equal \bind
         subscriber.close!
         game-engine.close!
         done!
@@ -109,10 +110,11 @@ describe "Game Engine", ->
         snake: 2
 
       (err) <- game-engine._load-config
-      (err) <- game-engine._bind
       (err) <- game-engine._init-game
+      (err) <- game-engine._bind
       (err) <- game-engine._init-ai
       should.not.exist err
 
       game-engine.ai-engines.should.have.length 2
+      game-engine.close!
       done!

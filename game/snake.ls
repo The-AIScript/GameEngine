@@ -62,16 +62,20 @@ class SnakeGame extends EventEmitter
     ], callback
 
   _setup: (callback) ~>
+    @round = 0
     @snakes = []
     @foods = []
-    for i from 1 to @config.snake
+    for i from 0 til @config.snake
       snake = {}
       snake.position = [@_get-random-space!]
       snake.heading = direction-mapping[random-int(4) - 1]
+      snake.id = i
       @snakes.push snake
 
     for i from 1 to @config.food
       @foods.push @_get-random-space!
+
+    @engine.on \connected:all, @_on-connected-handler
 
     callback null
 
@@ -84,6 +88,10 @@ class SnakeGame extends EventEmitter
     delete data.string
     data{snakes, foods} = @
     data
+
+  # handler
+  _on-connected-handler: ~>
+    @engine.send @_get-full-data!
 
   # helper
   _get-random-space: ~>

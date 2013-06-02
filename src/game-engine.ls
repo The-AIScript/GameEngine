@@ -5,6 +5,7 @@ require! {
 
   async
   zmq
+  msgpack
 
   AIEngine: \./ai-engine
 }
@@ -14,8 +15,8 @@ class GameEngine extends EventEmitter
   init: (callback) ~>
     async.series [
       @_load-config
-      @_bind
       @_init-game
+      @_bind
       @_init-ai
     ], callback
 
@@ -56,14 +57,17 @@ class GameEngine extends EventEmitter
       ai-engine.init callback
     , callback
 
-  _send: (data) ~>
-    @publisher.send data
+  send: (data) ~>
+    @publisher.send msgpack.pack(data)
 
   close: ~>
     @publisher.close!
     @replier.close!
+    if @ai-engines?
+      for ai in @ai-engines
+        ai.close!
 
-  # helper
+  # handler
   _replier-handler: (data) ~>
     if data.to-string! is \ACK
       @replier.send \OK
@@ -72,6 +76,7 @@ class GameEngine extends EventEmitter
       if @connection-count is @game.config.snake
         @emit 'connected:all'
 
+  # helper
   _bind-publisher: (callback) ~>
     @publisher.bind @config.resource.pub, callback
 

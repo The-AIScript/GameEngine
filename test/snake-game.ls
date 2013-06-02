@@ -8,6 +8,8 @@ require! {
   './test-helper'.async-error-throw
 }
 
+event-emmitter = new EventEmitter
+
 describe "Snake Game", ->
   describe '#_load-map()', (...) ->
     it 'should throw an error if the map is not provided', (done) ->
@@ -108,7 +110,7 @@ describe "Snake Game", ->
         * map: \test
           snake: 2
           food: 2
-        * this
+        * event-emmitter
       (err) <- game._load-config
       (err) <- game._setup
       should.not.exists err
@@ -163,9 +165,12 @@ describe "Snake Game", ->
       full-data.snakes.should.be.an.instanceof Array
       should.exist full-data.foods
       full-data.foods.should.be.an.instanceof Array
-      full-data.snakes[0].should.be.a \object
-      should.exist full-data.snakes[0].heading
-      should.exist full-data.snakes[0].position
+      for i from 0 til 3
+        full-data.snakes[i].should.be.a \object
+        should.exist full-data.snakes[i].heading
+        should.exist full-data.snakes[i].position
+        should.exist full-data.snakes[i].id
+        full-data.snakes[i].id.should.equal i
 
   describe '#_get-random-space()', (...) ->
     it 'should generate random cooradinate on space', (done) ->

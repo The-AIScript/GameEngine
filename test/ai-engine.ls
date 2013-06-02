@@ -1,8 +1,10 @@
 require! {
   zmq
   should
+  msgpack
 
   AIEngine: \../src/ai-engine
+  GameEngine: \../src/game-engine
   './test-helper'.async-error-throw
 }
 resource =
@@ -71,4 +73,4 @@ describe "AI Engine", (...) ->
             publisher.close!
             done!
 
-      publisher.send \hello
+      publisher.send msgpack.pack(\hello)
