@@ -64,18 +64,26 @@ class GameEngine extends EventEmitter
   close: ~>
     @publisher.close!
     @replier.close!
+    @game = null
     if @ai-engines?
       for ai in @ai-engines
         ai.close!
 
   # handler
   _replier-handler: (data) ~>
+    console.log "[Event replier message]"
     if data.to-string! is \ACK
       @replier.send \OK
       @emit 'connected:one'
       ++@connection-count
       if @connection-count is @game.config.snake
         @emit 'connected:all'
+    else
+      data = msgpack.unpack data
+      @game.operations[data.id] = data.operation
+      @emit 'finish'
+      @replier.send \OK
+
 
   # helper
   _bind-publisher: (callback) ~>

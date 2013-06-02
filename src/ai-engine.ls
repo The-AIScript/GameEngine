@@ -30,21 +30,26 @@ class AIEngine extends EventEmitter
       callback null
 
   _connect: (callback) ~>
-    @subscriber = zmq.socket 'sub'
+    @subscriber = zmq.socket \sub
     @subscriber.connect @resource.pub
     @subscriber.subscribe ''
-    @requestor = zmq.socket 'req'
+    @requestor = zmq.socket \req
     @requestor.connect @resource.rep
     @requestor.send \ACK
 
-    @subscriber.on 'message', (data) ~>
-      @_execute-ai msgpack.unpack(data)
+    @subscriber.on \message, (data) ~>
+      console.log "[Event subscriber message]"
+      @data = msgpack.unpack data
+      @_execute-ai!
 
     callback null
 
-  _execute-ai: (@data) ~>
-    (err) <~ @strategy @
-    @emit 'finish'
+  _execute-ai: ~>
+    (err, operation) <~ @strategy @
+    data =
+      id: @id
+      operation: operation
+    @requestor.send msgpack.pack data
 
   close: ~>
     @subscriber.close!

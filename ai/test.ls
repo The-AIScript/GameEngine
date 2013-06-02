@@ -1,9 +1,12 @@
 require! {
+  util
+
   '../game/helper'.map-data-to-array
   '../game/helper'.direction-mapping
   Map: \../game/map
 }
 exports = module.exports = (config, callback) ->
+  console.log "!![AI#{config.id}]!!"
   logic = AILogic config
   logic.run callback
 
@@ -20,13 +23,13 @@ class AILogic
     min-distance = Infinity
     for i from 0 to 3
       try-position = [direction-mapping[i][0] + @head[0], direction-mapping[i][1] + @head[1]]
-      if i isnt @back-direction and @map.get(try-position) is \.
+      if i isnt @back-direction and (@map.get(try-position) is \. or @map.get(try-position) is \F)
         distance = Math.min.apply @, @_get-food-distance try-position
         if distance < min-distance
           min-distance = distance
           operation = i
 
-    if operation = -1
+    if operation is -1
       operation = @heading
     callback null, operation
 

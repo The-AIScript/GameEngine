@@ -60,13 +60,22 @@ describe "AI Engine", (...) ->
 
   describe '#_connect()', (...) ->
     it 'should connect to game engine', (done) ->
-      # the publisher
-      publisher = zmq.socket 'pub'
       resource =
         pub: 'ipc:///tmp/connect-test-pub.ipc'
         rep: 'ipc:///tmp/connect-test-rep.ipc'
-      (err) <- publisher.bind resource.pub
+
+      # the replier
+      replier = zmq.socket \rep
+      (err) <- replier.bind resource.rep
       should.not.exist err
+
+      finish-count = 0
+      replier.on \message, (data) ->
+        replier.send \hello
+        finish-count := finish-count + 1
+        if finish-count is 2
+          replier.close!
+          done!
 
       # the subscriber
       finish-count = 0
@@ -84,13 +93,6 @@ describe "AI Engine", (...) ->
           ai-engine._connect (err) ->
             should.not.exist err
 
-          <- ai-engine.on \finish
-
-          finish-count := finish-count + 1
-          ai-engine.data.to-string!.should.equal \hello
+          <- ai-engine.subscriber.on \message
           ai-engine.close!
-          if finish-count is 2
-            publisher.close!
-            done!
 
-      publisher.send msgpack.pack(\hello)
