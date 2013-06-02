@@ -5,7 +5,6 @@ require! {
 
   async
   './helper'.random-int
-  './helper'.direction-mapping
   Map: \./map
 }
 class SnakeGame extends EventEmitter
@@ -71,7 +70,7 @@ class SnakeGame extends EventEmitter
       birth-position = @map.get-random-space!
       snake.position = [birth-position]
       @map.set birth-position, \S
-      snake.heading = direction-mapping[random-int(4) - 1]
+      snake.heading = random-int(4) - 1
       snake.id = i
       @snakes.push snake
 

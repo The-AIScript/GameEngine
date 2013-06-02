@@ -127,8 +127,7 @@ describe "Snake Game", ->
 
     it 'should generate random heading for each snake', (done) ->
       for snake in game.snakes
-        snake.heading.should.be.an.instanceof Array
-        snake.heading.should.have.length 2
+        snake.heading.should.be.a \number
 
       done!
 
