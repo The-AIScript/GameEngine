@@ -1,11 +1,11 @@
 require! {
   should
 
-  '../game/helper'.map-string-to-array
+  '../game/helper'.map-data-to-array
 }
 
 describe "Helpers", ->
-  describe '#map-string-to-array()', (...) ->
+  describe '#map-data-to-array()', (...) ->
     var array
     height = 2
     width = 4
@@ -15,7 +15,7 @@ describe "Helpers", ->
         height: height
         width: width
         string: \........
-      array := map-string-to-array map-obj
+      array := map-data-to-array map-obj
     # test cases
     it 'should accept an map-data object and return an array', ->
       array.should.be.an.instanceof Array
@@ -26,7 +26,7 @@ describe "Helpers", ->
         width: 4
         string: \..
       fn = ~>
-        map-string-to-array map-obj
+        map-data-to-array map-obj
 
       fn.should.throw '`height` and `width` do not match the string'
 

@@ -43,7 +43,7 @@ class AIEngine extends EventEmitter
     callback null
 
   _execute-ai: (@data) ~>
-    (err) <~ @strategy @data
+    (err) <~ @strategy @
     @emit 'finish'
 
   close: ~>

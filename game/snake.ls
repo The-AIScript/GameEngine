@@ -4,7 +4,7 @@ require! {
   events.EventEmitter
 
   async
-  './helper'.map-string-to-array
+  './helper'.map-data-to-array
   './helper'.random-int
   './helper'.direction-mapping
 }
@@ -32,7 +32,7 @@ class SnakeGame extends EventEmitter
       else
         @map = JSON.parse results[1].to-string!
         @map.string = results[0].to-string!.replace(/\n/g, '')
-        @map.array = map-string-to-array @map
+        @map.array = map-data-to-array @map
         callback null
 
   _load-config: (callback) ~>
