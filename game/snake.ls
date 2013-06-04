@@ -2,6 +2,8 @@ require! {
   fs
   path
   events.EventEmitter
+  mongodb.Server
+  mongodb.Db
 
   async
   _: underscore
@@ -10,15 +12,29 @@ require! {
   './helper'.direction-mapping
   Map: \./map
 }
+server = new Server \localhost, 27017, {native_parser: true}
+db = new Db \snake, server, {safe: true}
+
 class SnakeGame extends EventEmitter
   (@options = {}, @engine) ~>
 
   init: (callback) ~>
     @operations = []
     async.series [
+      @_init-db
       @_load-map
       @_load-config
       @_setup
+    ], callback
+
+  _init-db: (callback) ~>
+    async.waterfall [
+      (callback) ~>
+        db.open callback
+      (@db, callback) ~>
+        @db.collection \rounds, callback
+      (@collection, callback) ~>
+        callback null
     ], callback
 
   _load-map: (callback) ~>
@@ -100,6 +116,9 @@ class SnakeGame extends EventEmitter
     data{snakes, foods} = @
     data
 
+  close: ~>
+    @db.close!
+
   # handler
   _on-connected-handler: ~>
     console.log "[Event: connected:all]"
@@ -108,7 +127,13 @@ class SnakeGame extends EventEmitter
       @was-dead.push false
     @engine.on \finish, @_on-finish-handler
     @engine.on \finish:all, @_on-finish-all-handler
-    @engine.send @_get-full-data!
+    full-data = @_get-full-data!
+    doc = _id: 0
+    doc <<< full-data
+    (err) <~ @collection.insert doc, {}
+    if err
+      throw err
+    @engine.send full-data
 
   _on-finish-handler: ~>
     console.log "[Event: finish]"
@@ -159,9 +184,8 @@ class SnakeGame extends EventEmitter
     console.log "[new food]"
     for i from 0 til @config.food
       if is-eaten[i]
-        @foods.splice i, 1
         food = @map.get-random-space @new-positions
-        @foods.push food
+        @foods.splice i, 1, food
 
     # move the snake
     console.log "[move]"
@@ -203,6 +227,13 @@ class SnakeGame extends EventEmitter
       # logger
       console.log "real-map", @map.real-map
       fs.append-file-sync './log', @map.to-string(@map.real-map) + \\n\n
+      doc =
+        _id: @round
+        snakes: @snakes
+        foods: @foods
+      (err) <~ @collection.insert doc, {}
+      if err
+        throw err
       console.log "\n!!!!!!!!!!!!!!!!!!!!!!!!!\n!![Game Round #{@round}]!!\n!!!!!!!!!!!!!!!!!!!!!!!!!\n"
       @engine.send data
 

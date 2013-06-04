@@ -7,6 +7,7 @@
     "async": ">=0.2.8",
     "msgpack": "*",
     "zmq": ">=2.4",
+    "mongodb": "*",
     "underscore": ">=1.4",
     "underscore.string": ">=2.3"
   },
